@@ -103,7 +103,7 @@ def login():
 
 
 def main(account_manager):
-    filename = "your-filename.pkl"
+    filename = "accounts.pkl"
     fig = Figlet(font="slant")
 
     try:
