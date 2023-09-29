@@ -1,6 +1,6 @@
 # What is this
 
-CredX is a program to store personal account credential in command line. The stored data is encrypted using Fernet so it is not easily accessed by irresponsible people. The program also has a login process to increase the security. Don't forget to regularly backup the `.pkl` file.
+CredX is a program to store personal account credential in command line. The stored data is encrypted using Fernet so it is not easily accessed by irresponsible people. The program also has a login process to increase the security.
 
 # How To Use
 
@@ -66,4 +66,7 @@ You can change the login username in the `login()` method. Find the `if input_us
 
 ---
 
-\*note: I'm working on to make the executable for this program, so if you're not familiar with python you can use it by running the `.exe` file.
+\*notes: 
+
+- I'm working on to make the executable for this program, so if you're not familiar with python you can use it by running the `.exe` file.
+- Don't forget to regularly backup the `.pkl` file.
