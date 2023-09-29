@@ -1,6 +1,6 @@
 # What is this
 
-CredX is a program to store personal account credential in command line. The stored data is encrypted using Fernet so it is not easily accessed by irresponsible people. The program also has a login process to increase the security.
+CredX is a program to store personal account credential in command line. The stored data is encrypted using Fernet so it is not easily accessed by irresponsible people. The program also has a login process to increase the security. Don't forget to regularly backup the `.pkl` file.
 
 # How To Use
 
