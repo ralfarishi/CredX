@@ -82,24 +82,29 @@ def login():
     fig = Figlet(font="slant")
     print(colored(fig.renderText("CredX Login"), "blue", attrs=["bold", "blink"]))
 
-    input_username = input("Username: ")
-    input_password = getpass.getpass("Password: ")
+    try:
+        input_username = input("Username: ")
+        input_password = getpass.getpass("Password: ")
 
-    if input_username == "Potus" and bcrypt.checkpw(
-        input_password.encode("utf-8"), hashed_password
-    ):
-        print("Loading...")
-        time.sleep(2.5)
+        if input_username == "Potus" and bcrypt.checkpw(
+            input_password.encode("utf-8"), hashed_password
+        ):
+            print("Loading...")
+            time.sleep(2.5)
 
-        fig = Figlet(font="slant")
-        print(
-            colored(fig.renderText("Hello, Potus!"), "green", attrs=["bold", "blink"])
-        )
+            fig = Figlet(font="slant")
+            print(
+                colored(
+                    fig.renderText("Hello, Potus!"), "green", attrs=["bold", "blink"]
+                )
+            )
 
-        account_manager = AccountManager(encryption_key)
-        main(account_manager)
-    else:
-        print("Credentials tidak ditemukan!")
+            account_manager = AccountManager(encryption_key)
+            main(account_manager)
+        else:
+            print("Credentials tidak ditemukan!")
+    except KeyboardInterrupt:
+        print("\nSampai jumpa kembali!")
 
 
 def main(account_manager):
@@ -111,71 +116,80 @@ def main(account_manager):
     except EOFError:
         print("File data kosong atau tidak valid.")
 
-    while True:
-        print("\nMenu Utama:")
-        print("1. Tambah Akun")
-        print("2. Update Akun")
-        print("3. Lihat Akun")
-        print("4. Hapus Akun")
-        print("5. Simpan dan Keluar")
-        choice = input("Pilih menu (1/2/3/4/5): ")
+    try:
+        while True:
+            print("\nMenu Utama:")
+            print("1. Tambah Akun")
+            print("2. Update Akun")
+            print("3. Lihat Akun")
+            print("4. Hapus Akun")
+            print("5. Simpan dan Keluar")
+            choice = input("Pilih menu (1/2/3/4/5): ")
 
-        if choice == "1":
-            account_type = input("\nMasukkan jenis akun: ")
-            username = input("Masukkan username: ")
-            password = input("Masukkan password: ")
-            account_manager.add_account(account_type, username, password)
-        elif choice == "2":
-            account_manager.view_accounts()
-            if account_manager.accounts:
-                account_index = int(input("Pilih nomor akun yang akan di-update: ")) - 1
-                selected_account = account_manager.get_account(account_index)
-                if selected_account:
-                    new_account_type = input(
-                        "Masukkan jenis akun (kosongkan jika tidak ingin mengubah) : "
+            if choice == "1":
+                account_type = input("\nMasukkan jenis akun: ")
+                username = input("Masukkan username: ")
+                password = input("Masukkan password: ")
+                account_manager.add_account(account_type, username, password)
+            elif choice == "2":
+                account_manager.view_accounts()
+                if account_manager.accounts:
+                    account_index = (
+                        int(input("Pilih nomor akun yang akan di-update: ")) - 1
                     )
-                    new_username = input(
-                        "Masukkan username (kosongkan jika tidak ingin mengubah) : "
-                    )
-                    new_password = input(
-                        "Masukkan password (kosongkan jika tidak ingin mengubah) : "
-                    )
-                    account_manager.update_account(
-                        account_index, new_account_type, new_username, new_password
-                    )
-                else:
-                    print("Nomor akun tidak valid.")
-        elif choice == "3":
-            account_manager.view_accounts()
-            if account_manager.accounts:
-                account_index = int(input("Pilih nomor akun yang ingin dilihat: ")) - 1
-                selected_account = account_manager.get_account(account_index)
-                if selected_account:
-                    print(
-                        colored(
-                            fig.renderText(selected_account["Account Type"]),
-                            "red",
-                            attrs=["bold"],
+                    selected_account = account_manager.get_account(account_index)
+                    if selected_account:
+                        new_account_type = input(
+                            "Masukkan jenis akun (kosongkan jika tidak ingin mengubah) : "
                         )
+                        new_username = input(
+                            "Masukkan username (kosongkan jika tidak ingin mengubah) : "
+                        )
+                        new_password = input(
+                            "Masukkan password (kosongkan jika tidak ingin mengubah) : "
+                        )
+                        account_manager.update_account(
+                            account_index, new_account_type, new_username, new_password
+                        )
+                    else:
+                        print("Nomor akun tidak valid.")
+            elif choice == "3":
+                account_manager.view_accounts()
+                if account_manager.accounts:
+                    account_index = (
+                        int(input("Pilih nomor akun yang ingin dilihat: ")) - 1
                     )
-                    print(f"Username: {selected_account['Username']}")
-                    print(f"Password: {selected_account['Password']}")
-                else:
-                    print("Nomor akun tidak valid.")
-        elif choice == "4":
-            account_manager.view_accounts()
-            if account_manager.accounts:
-                account_index = int(input("Pilih nomor akun yang akan dihapus: ")) - 1
-                account_to_delete = account_manager.get_account(account_index)
-                if account_to_delete:
-                    account_manager.delete_account(account_index)
-                else:
-                    print("Nomor akun tidak valid.")
-        elif choice == "5":
-            account_manager.save_to_file(filename)
-            break
-        else:
-            print("Pilihan tidak valid. Silakan coba lagi.")
+                    selected_account = account_manager.get_account(account_index)
+                    if selected_account:
+                        print(
+                            colored(
+                                fig.renderText(selected_account["Account Type"]),
+                                "red",
+                                attrs=["bold"],
+                            )
+                        )
+                        print(f"Username: {selected_account['Username']}")
+                        print(f"Password: {selected_account['Password']}")
+                    else:
+                        print("Nomor akun tidak valid.")
+            elif choice == "4":
+                account_manager.view_accounts()
+                if account_manager.accounts:
+                    account_index = (
+                        int(input("Pilih nomor akun yang akan dihapus: ")) - 1
+                    )
+                    account_to_delete = account_manager.get_account(account_index)
+                    if account_to_delete:
+                        account_manager.delete_account(account_index)
+                    else:
+                        print("Nomor akun tidak valid.")
+            elif choice == "5":
+                account_manager.save_to_file(filename)
+                break
+            else:
+                print("Pilihan tidak valid. Silakan coba lagi.")
+    except KeyboardInterrupt:
+        print("\nSampai jumpa kembali!")
 
 
 if __name__ == "__main__":
