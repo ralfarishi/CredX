@@ -1,7 +1,7 @@
-import getpass, bcrypt, time, pickle
+import getpass, bcrypt, time, os, pickle
 from cryptography.fernet import Fernet
 from pyfiglet import Figlet
-from termcolor import colored
+from colorama import Fore, Style, init
 
 
 class AccountManager:
@@ -72,49 +72,154 @@ class AccountManager:
                 self.accounts = pickle.loads(decrypted_data)
                 print(f"Data berhasil dimuat dari {filename}")
         except (FileNotFoundError, pickle.UnpicklingError):
-            print(f"File {filename} tidak ditemukan atau data tidak valid.")
+            print(f"Tambah data untuk membuat file {filename} secara otomatis.")
 
 
-def login():
-    hashed_password = b"your_hashed_password"
-    encryption_key = b"your_encryption_key"
+def save_configuration(username, hashed_password, encryption_key):
+    with open("credents.pkl", "wb") as file:
+        config = {
+            "username": username,
+            "hashed_password": hashed_password,
+            "encryption_key": encryption_key,
+        }
+        pickle.dump(config, file)
 
+
+def load_configuration():
+    if os.path.exists("credents.pkl"):
+        with open("credents.pkl", "rb") as file:
+            config = pickle.load(file)
+
+            return (
+                config["username"],
+                config["hashed_password"],
+                config["encryption_key"],
+            )
+    return None, None, None
+
+
+def main():
+    filename = "accounts.pkl"
     fig = Figlet(font="slant")
-    print(colored(fig.renderText("CredX Login"), "blue", attrs=["bold", "blink"]))
+    init(autoreset=True)
+    encryption_key = None
 
     try:
-        input_username = input("Username: ")
-        input_password = getpass.getpass("Password: ")
+        if os.path.exists("credents.pkl"):
+            username, hashed_password, encryption_key = load_configuration()
+            if (
+                username is not None
+                and hashed_password is not None
+                and encryption_key is not None
+            ):
+                print(Fore.LIGHTBLUE_EX + Style.BRIGHT + fig.renderText("CredX Login"))
+                input_username = input("Username: ")
+                input_password = getpass.getpass("Password: ")
 
-        if input_username == "Potus" and bcrypt.checkpw(
-            input_password.encode("utf-8"), hashed_password
-        ):
-            print("Loading...")
-            time.sleep(2.5)
-
-            fig = Figlet(font="slant")
-            print(
-                colored(
-                    fig.renderText("Hello, Potus!"), "green", attrs=["bold", "blink"]
-                )
-            )
-
-            account_manager = AccountManager(encryption_key)
-            main(account_manager)
+                if input_username == username and bcrypt.checkpw(
+                    input_password.encode("utf-8"), hashed_password.encode("utf-8")
+                ):
+                    print("Loading...")
+                    time.sleep(2.5)
+                    print(
+                        Fore.LIGHTGREEN_EX
+                        + Style.BRIGHT
+                        + fig.renderText("Hello, " + input_username)
+                    )
+                    account_manager = AccountManager(encryption_key.encode())
+                    account_manager.load_from_file(filename)
+                    account_manager_menu(account_manager, filename)
+                else:
+                    print("Loading...")
+                    time.sleep(2.5)
+                    print("Login gagal. Username atau password salah.")
         else:
-            print("Credentials tidak ditemukan!")
+            while True:
+                print(Fore.LIGHTRED_EX + Style.BRIGHT + fig.renderText("CredX"))
+                print("Menu Utama:")
+                print("1. Konfigurasi")
+                print("2. Login")
+                print("3. Keluar")
+                choice = input("Pilih menu (1/2/3): ")
+
+                if choice == "1":
+                    if encryption_key is not None:
+                        print("Konfigurasi sudah dilakukan. Menu login akan tampil.")
+                    else:
+                        print("Konfigurasi:")
+                        new_username = input("Masukkan username: ")
+                        new_password = getpass.getpass("Masukkan password: ")
+
+                        salt = bcrypt.gensalt()
+                        hashed_password = bcrypt.hashpw(new_password.encode(), salt)
+
+                        encryption_key = Fernet.generate_key()
+
+                        print("\n=== Hasil Konfigurasi ===")
+                        print(f"Username: {new_username}")
+                        print(f"Hashed Password: **secret**")
+                        print(f"Encryption Key: **secret**\n")
+
+                        choice = input(
+                            "Apakah Anda ingin menyimpan konfigurasi (y/n)? "
+                        ).lower()
+                        if choice == "y":
+                            save_configuration(
+                                new_username,
+                                hashed_password.decode(),
+                                encryption_key.decode(),
+                            )
+                            print("Konfigurasi berhasil disimpan.")
+                        else:
+                            print("Konfigurasi tidak disimpan.")
+
+                elif choice == "2":
+                    username, hashed_password, encryption_key = load_configuration()
+                    if (
+                        username is not None
+                        and hashed_password is not None
+                        and encryption_key is not None
+                    ):
+                        print(
+                            Fore.LIGHTBLUE_EX
+                            + Style.BRIGHT
+                            + fig.renderText("CredX Login")
+                        )
+                        input_username = input("Username: ")
+                        input_password = getpass.getpass("Password: ")
+
+                        if input_username == username and bcrypt.checkpw(
+                            input_password.encode("utf-8"),
+                            hashed_password.encode("utf-8"),
+                        ):
+                            print("Loading...")
+                            time.sleep(2.5)
+                            print(
+                                Fore.LIGHTGREEN_EX
+                                + Style.BRIGHT
+                                + fig.renderText("Hello, " + input_username)
+                            )
+                            account_manager = AccountManager(encryption_key.encode())
+                            account_manager.load_from_file(filename)
+                            account_manager_menu(account_manager, filename)
+                        else:
+                            print("Loading...")
+                            time.sleep(2.5)
+                            print("Login gagal. Username atau password salah.")
+                    else:
+                        print(
+                            "Konfigurasi belum dilakukan. Silakan konfigurasi terlebih dahulu."
+                        )
+                elif choice == "3":
+                    break
+                else:
+                    print("Pilihan tidak valid. Silakan coba lagi.")
     except KeyboardInterrupt:
         print("\nSampai jumpa kembali!")
 
 
-def main(account_manager):
-    filename = "accounts.pkl"
+def account_manager_menu(account_manager, filename):
     fig = Figlet(font="slant")
-
-    try:
-        account_manager.load_from_file(filename)
-    except EOFError:
-        print("File data kosong atau tidak valid.")
 
     try:
         while True:
@@ -162,11 +267,9 @@ def main(account_manager):
                     selected_account = account_manager.get_account(account_index)
                     if selected_account:
                         print(
-                            colored(
-                                fig.renderText(selected_account["Account Type"]),
-                                "red",
-                                attrs=["bold"],
-                            )
+                            Fore.LIGHTRED_EX
+                            + Style.BRIGHT
+                            + fig.renderText(selected_account["Account Type"])
                         )
                         print(f"Username: {selected_account['Username']}")
                         print(f"Password: {selected_account['Password']}")
@@ -193,4 +296,4 @@ def main(account_manager):
 
 
 if __name__ == "__main__":
-    login()
+    main()
