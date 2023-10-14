@@ -157,8 +157,7 @@ def main():
 
                         print("\n=== Hasil Konfigurasi ===")
                         print(f"Username: {new_username}")
-                        print(f"Hashed Password: **secret**")
-                        print(f"Encryption Key: **secret**\n")
+                        print(f"Password: **secret**")
 
                         choice = input(
                             "Apakah Anda ingin menyimpan konfigurasi (y/n)? "
