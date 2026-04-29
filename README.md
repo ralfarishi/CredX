@@ -1,36 +1,118 @@
-# What is this
+# CredX Vault v1.9.2
 
-CredX is a program to store personal account credential in command line. The stored data is encrypted using Fernet so it is not easily accessed by irresponsible people. The program also has a login process to increase the security.
+A **Zero-Knowledge CLI Credential Manager** with industry-standard security following Bitwarden/1Password architecture patterns.
 
-# How To Use
+## 🔐 Security Features
 
-## Install Modules
+- **Zero-Knowledge**: Database never sees your master password or encryption keys.
+- **AES-256-GCM**: Authenticated encryption with tamper detection.
+- **Argon2id KDF**: OWASP 2024 recommended key derivation (GPU-resistant).
+- **Memory Hardening**: Active memory wiping (`secure_wipe`) to prevent RAM scraping.
+- **Lazy Decryption**: Resource-efficient UI that only decrypts data on demand.
+- **Portable**: Login from any device with just Email + Master Password.
 
-- Python v3.11.5
-- Pip v23.2.1
+## 🏗️ Architecture
 
-1. Clone this repo into your local computer. Then move inside to the cloned folder.
-
-```bash
-git clone https://github.com/ralfarishi/CredX.git
-cd /CredX
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         YOUR DEVICE                              │
+│  ┌──────────┐    ┌──────────────┐    ┌───────────────────────┐  │
+│  │  Email   │───>│ Fetch Salt   │───>│     Argon2id KDF      │  │
+│  └──────────┘    │ (Public DB)  │    │  (64MB, 3 iterations) │  │
+│                  └──────────────┘    └───────────┬───────────┘  │
+│  ┌──────────┐                                    │              │
+│  │ Master   │────────────────────────────────────┘              │
+│  │ Password │                                                   │
+│  └──────────┘                        ┌───────────┴───────────┐  │
+│                                      │     Master Key (Km)   │  │
+│                                      └───────────┬───────────┘  │
+│                                 ┌────────────────┼────────────┐ │
+│                                 │                │            │ │
+│                         ┌───────▼───────┐ ┌──────▼──────┐     │ │
+│                         │  Auth Key     │ │ Encryption  │     │ │
+│                         │  (Ka) - HKDF  │ │ Key (Ke)    │     │ │
+│                         └───────┬───────┘ └──────┬──────┘     │ │
+│                                 │                │            │ │
+│                                 ▼                ▼            │ │
+│                         ┌─────────────┐  ┌─────────────┐      │ │
+│                         │ Database    │  │ Decrypt PSK │      │ │
+│                         │ Auth Login  │  │ -> Vault Key│      │ │
+│                         └─────────────┘  └─────────────┘      │ │
+└─────────────────────────────────────────────────────────────────┘
+                                │                │
+                                ▼                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                          DATABASE                                │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  auth.users     │  │ user_metadata   │  │     vault       │  │
+│  │  (Auth only)    │  │ (Salt + PSK)    │  │ (Encrypted)     │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+│                                                                  │
+│  Database sees: hex(Ka), Salt, PSK, Encrypted blobs             │
+│  Database NEVER sees: Master Password, Km, Ke, Vault Key, Data  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-2. Install all modules using pip.
+## 🚀 Quick Start
+
+### 1. Configure Environment
 
 ```bash
-pip install cryptography bcrypt pyfiglet colorama
+cp .env.example .env
+# Edit .env with your Database URL and anon key
 ```
 
-3. Wait until the installation complete.
+### 2. Setup Database
 
-4. Run the `main.py` file.
+- Go to your Database Dashboard → SQL Editor.
+- Run the consolidated `schema.sql` to initialize/update your tables and RPC functions.
 
-5. Then, make your own configuration by choosing the first menu.
+### 3. Installation
 
----
+#### **Desktop (Windows/macOS/Linux)**
 
-\*notes:
+```bash
+# Install in editable mode (Professional method)
+pip install -e .
 
-- I'm working on to make the executable for this program, so if you're not familiar with python you can use it by running the `.exe` file.
-- Don't forget to regularly backup the `.pkl` file.
+# Run the application
+python -m credx_v2
+```
+
+#### **Android (Termux)**
+
+Bypass heavy compilation errors by using pre-compiled binaries:
+
+```bash
+# Run the automated setup script
+bash requirements_termux.sh
+
+# Run the application
+python -m credx_v2
+```
+
+## 🧪 Automated Testing
+
+To ensure your installation is clean and error-free:
+
+```bash
+# Run unit tests (Local logic)
+python tests/test_credx.py
+
+# Run full integration test (Live Database check)
+python tests/integration_full_flow.py
+```
+
+## 🔒 Key Concepts
+
+| Term                              | Description                                              |
+| --------------------------------- | -------------------------------------------------------- |
+| **Master Key (Km)**               | Derived from password + salt via Argon2id. Never stored. |
+| **Auth Key (Ka)**                 | HKDF(Km, "auth"). Used as Database password (hex).       |
+| **Encryption Key (Ke)**           | HKDF(Km, "encryption"). Decrypts PSK.                    |
+| **Symmetric Key (Ks)**            | Random 256-bit key. Encrypts vault data.                 |
+| **Protected Symmetric Key (PSK)** | AES-GCM(Ks, Ke). Stored in database.                     |
+
+## 📜 License
+
+MIT

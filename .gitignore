@@ -1,6 +1,18 @@
-generate_key.py
+__pycache__/
+.agents
+.gemini
+.vscode
+.env*
 
-env
+skills-lock.json
+
+backups/
 dist
 
-main.spec
+credx_v2.egg-info
+
+migration_v3_1.sql
+migration_v3_2.sql
+migration_v3_3.sql
+
+schema.sql
