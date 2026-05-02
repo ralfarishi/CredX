@@ -12,6 +12,9 @@ APP_NAME = "CredX"
 APP_VERSION = "1.9.2"
 APP_SUBTITLE = "Zero-Knowledge Vault"
 
+# Public Mode state
+PUBLIC_MODE = False
+
 # Canary value for master password verification
 CANARY_SERVICE = "__SYSTEM_CANARY__"
 CANARY_VALUE = "CREDX_VAULT_CANARY_CHECK"

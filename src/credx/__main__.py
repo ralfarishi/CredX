@@ -3,6 +3,7 @@ CredX Vault - Main Entry Point (v3.1 Zero-Knowledge)
 Secure CLI password manager using Supabase backend.
 """
 
+import argparse
 import signal
 import sys
 import time
@@ -12,6 +13,7 @@ from dotenv import load_dotenv
 from rich.align import Align
 from rich.panel import Panel
 
+from . import config
 from .auth import (
     AuthContext,
     authenticate,
@@ -105,6 +107,14 @@ def main_menu(vault: VaultManager, auth_context: AuthContext):
 def main():
     """Application entry point."""
     global _CURRENT_AUTH_CONTEXT, _CURRENT_VAULT_MANAGER
+    
+    parser = argparse.ArgumentParser(description=f"{config.APP_NAME} - {config.APP_SUBTITLE}")
+    parser.add_argument("--public", action="store_true", help="Enable public mode (hides real passwords)")
+    args = parser.parse_args()
+    
+    if args.public:
+        config.PUBLIC_MODE = True
+        
     auth_context = None
     vault = None
     try:

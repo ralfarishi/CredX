@@ -9,10 +9,6 @@ skills-lock.json
 backups/
 dist
 
-credx_v2.egg-info
-
-migration_v3_1.sql
-migration_v3_2.sql
-migration_v3_3.sql
+credx.egg-info
 
 schema.sql

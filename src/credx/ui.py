@@ -17,7 +17,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
-from .config import APP_NAME, APP_SUBTITLE, APP_VERSION, CUSTOM_THEME
+from .config import APP_NAME, APP_SUBTITLE, APP_VERSION, CUSTOM_THEME, PUBLIC_MODE
 
 console = Console(theme=CUSTOM_THEME)
 fig = Figlet(font="slant")
@@ -84,11 +84,18 @@ def render_status_bar(user_email: str):
     Args:
         user_email: The authenticated user's email
     """
+    from . import config
+    
     status = Table.grid(expand=True)
     status.add_column(justify="left")
     status.add_column(justify="right")
+    
+    operator_text = Text(f"🤖 Operator: {user_email}", style="success")
+    if config.PUBLIC_MODE:
+        operator_text.append(" [IN PUBLIC]", style="bold yellow")
+        
     status.add_row(
-        Text(f"🤖 Operator: {user_email}", style="success"),
+        operator_text,
         Text(datetime.now().strftime("%Y-%m-%d %H:%M"), style="muted"),
     )
     console.print(Panel(status, border_style="dim cyan", padding=(0, 1)))

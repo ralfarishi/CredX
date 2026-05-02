@@ -3,10 +3,10 @@ from unittest.mock import MagicMock
 import os
 import sys
 
-# Ensure credx_v2 can be imported from src
+# Ensure credx can be imported from src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from credx_v2.crypto import (
+from credx.crypto import (
     derive_master_key, 
     derive_auth_key, 
     derive_encryption_key,
@@ -17,8 +17,8 @@ from credx_v2.crypto import (
     generate_salt,
     generate_symmetric_key
 )
-from credx_v2.vault import VaultManager
-from credx_v2.auth import AuthContext
+from credx.vault import VaultManager
+from credx.auth import AuthContext
 
 class TestCredX(unittest.TestCase):
     

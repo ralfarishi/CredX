@@ -76,7 +76,17 @@ cp .env.example .env
 pip install -e .
 
 # Run the application
-python -m credx_v2
+python -m credx
+
+# List available command
+python run.py --help
+```
+
+or
+
+```bash
+# From root directory
+python run.py
 ```
 
 #### **Android (Termux)**
@@ -88,7 +98,7 @@ Bypass heavy compilation errors by using pre-compiled binaries:
 bash requirements_termux.sh
 
 # Run the application
-python -m credx_v2
+python -m credx
 ```
 
 ## 🧪 Automated Testing

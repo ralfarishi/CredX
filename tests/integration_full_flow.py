@@ -5,10 +5,10 @@ import secrets
 from dotenv import load_dotenv
 from supabase import create_client
 
-# Add path to import credx_v2 from src
+# Add path to import credx from src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from credx_v2.auth import (
+from credx.auth import (
     get_supabase_client,
     derive_keys_from_password,
     create_user_metadata,
@@ -16,7 +16,7 @@ from credx_v2.auth import (
     AuthContext,
     verify_or_create_canary
 )
-from credx_v2.crypto import (
+from credx.crypto import (
     derive_master_key,
     derive_auth_key,
     derive_encryption_key,
@@ -28,7 +28,7 @@ from credx_v2.crypto import (
     base64_to_bytes,
     bytes_to_base64
 )
-from credx_v2.vault import VaultManager
+from credx.vault import VaultManager
 
 load_dotenv()
 

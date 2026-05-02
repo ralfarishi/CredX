@@ -4,6 +4,7 @@ Handles user interactions for each menu option with interactive selection.
 """
 
 import getpass
+import os
 
 from pyfiglet import Figlet
 from rich.align import Align
@@ -12,7 +13,9 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from . import config
 from .crypto import secure_wipe
+from .lib.riddle_gen import RiddleGenerator
 from .ui import (
     console,
     interactive_confirm,
@@ -106,11 +109,22 @@ def handle_get_password(vault: VaultManager):
     fig.width = min(console.width - 10, 60)
     service_art = fig.renderText(entry["service"]).rstrip()
 
+    pwd_label = "Pwd:"
+    pwd_value = entry["password"]
+
+    if config.PUBLIC_MODE:
+        pwd_label = "Pwd (Obfuscated):"
+        # Path to lexicon.json relative to this file
+        lexicon_path = os.path.join(os.path.dirname(__file__), "lib", "lexicon.json")
+        # Use None as seed for full randomization each time the account is viewed
+        gen = RiddleGenerator(json_path=lexicon_path, account_seed=None)
+        pwd_value = gen.generate(entry["password"])
+
     info_table = Table(show_header=False, box=None, padding=(0, 3))
     info_table.add_column("System Parameter", style="muted")
     info_table.add_column("Value String", style="bold white")
     info_table.add_row("Uid:", entry["username"])
-    info_table.add_row("Pwd:", entry["password"])
+    info_table.add_row(pwd_label, pwd_value)
 
     detail_content = Group(
         Align.center(Text(service_art, style="secondary")),
